@@ -44,6 +44,8 @@ SC3_PUSH_KEY = os.environ.get("SC3_PUSH_KEY")
 
 HOME_URL = "https://linux.do/"
 
+COOKIE_STR = "_ga=GA1.1.1194486217.1751335052; __stripe_mid=cac63275-1c52-495b-a516-25f8bb54de25b862ae; __stripe_sid=876730fb-97aa-4d76-a113-5be9db88be8363db12; cf_clearance=swqBKZ13bDnWEcDUQX60xAjTdnfAzFFVRls0iru.uow-1751335657-1.2.1.1-5Ad169h5GonP4kSk3aQ.ohHrvVFmHdx6.0wI3quXJ9Uvc8DVAG2utR3mbjJqCGVAq2depq1mmUDhj4NDENBDhXWuw2uafeu63LN5gXWlZ3KKwmA0rq26WQjzy2OWDxP743oHzNG2AKd2JkjN3PrAaurqID2FFKpWUXl9CIzpnZ65rQlA1T.jwrwGQQkn40HtyRFfXqSI96_n.i..emc0Gy87Ajbo6vkHS7lsd4.CfYwvv2MZ0rMGF.VwjNNzq_bzL.ZUPLQm0.VQ2vskKdnd1hZKCA.0I4R0PvAb1tOnHVognL6wTZmGBTpblMmZhcYLopS7he3gOh.w8PMgUOxuqaivYXEMMJL1i7ZuD_cP_zcprqJcq1SrnDGIbutMTmAX; _t=%2BVZqy5BOGt0577W6JaDYr3D2MKiYIJzhnhkMLqFiU%2BzkzfzrMPkAnRLjPsi0lxZP%2BZoGB%2Bwr0cX86ddoe8DpgxjdDsNaZjki2LLC7lnS4U%2FXm9g6GIMaIJODieylgYMVoJudxiH73aPwr9a1plDkvPJ%2BMUiT%2FxrvX%2BkhXIuyaO%2FRyvcsDr%2Bc7myhXBNNqbLkOQNJ2nP%2B4eyjot7hasElb4gIj94SahqwMyTEpQEpqECOC%2B7y4FCKSPm0ox%2B3Us2g9i4kgUWOkrHgMCzRLWf9IjQrw2s0LSqqTXGwvZGh2TgqrZV4EERNAOZHDB12XJTY--JPqPAkk4%2FdC5kqOu--MH7gVEULIY2weEabuFv%2BEw%3D%3D; _ga_1X49KS6K0M=GS2.1.s1751335052$o1$g1$t1751335677$j48$l0$h989914038; _forum_session=WdrL07jnUIxYCbUVdZGcv6N9jSkMsTp4nO6%2BMlC6K3ij3nOtc%2B1OMzKAX7wfsWKlnSuhbRGknKwBJoVf3VrBpztSgrLvRHOJ1O9ir1eVI3M1kpoMa9AiAPPjUfRa%2FA3DqTs5OvCuyTiZChiOvAcFelDIIvl4yq5nRsOhx0qXbRPadrwrX8sv36d4L2KCNO4CzTVrKrcK3iSsQZxqie%2F8ZXVzUor9WPUoWQLv0PN6ShMwI%2BPaDShWZQY0cUQSUddWdQjqTO4hpjUUNC0gdP%2BV0G1yPmMFI55I2mvjXDiYP772%2F25RnAJl8CuzxXykP7bmtpSQ1iHfQdvoZ%2B2ZyA7CTUuiOM7O8C%2Frg%2F9YEOZbiGcfXvg8fstfUVQ2l7ZaGw%3D%3D--N2CHpw1QZVYecLqQ--%2F3k4x0v5bQuYbKwGwRaPpg%3D%3D"
+
 class LinuxDoBrowser:
     def __init__(self) -> None:
         EXTENSION_PATH = os.path.abspath(
@@ -119,6 +121,9 @@ class LinuxDoBrowser:
 
     def run(self):
         cookies_str = os.environ.get("LINUXDO_COOKIES")
+        if not cookies_str:
+            cookies_str = COOKIE_STR
+
         if not cookies_str:
             logger.error("未配置 LINUXDO_COOKIES，程序终止")
             sys.exit(1)
