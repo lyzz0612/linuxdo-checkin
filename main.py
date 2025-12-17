@@ -143,6 +143,8 @@ class LinuxDoBrowser:
         except Exception as e:
             logger.error(f"登录请求异常: {e}")
             return False
+            
+        self.print_connect_info()  # 打印连接信息
 
         # Step 3: Pass cookies to DrissionPage
         logger.info("同步 Cookie 到 DrissionPage...")
@@ -236,7 +238,6 @@ class LinuxDoBrowser:
             logger.error("登录失败，程序终止")
             sys.exit(1)  # 使用非零退出码终止整个程序
             
-        self.print_connect_info()  # 打印连接信息
 
         if BROWSE_ENABLED:
             self.click_topic()  # 点击主题
