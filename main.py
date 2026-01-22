@@ -170,7 +170,7 @@ class LinuxDoBrowser:
                     params={"token": GOTIFY_TOKEN},
                     json={
                         "title": "LINUX DO",
-                        "message": f"✅每日签到成功完成",
+                        "message": f"✅每日签到成功完成，{USERNAME}",
                         "priority": 1
                     },
                     timeout=10
