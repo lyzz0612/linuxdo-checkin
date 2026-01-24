@@ -176,18 +176,21 @@ class LinuxDoBrowser:
         self.page.get(HOME_URL)
 
         time.sleep(5)
-        return True
-        # user_ele = self.page.ele("@id=current-user")
-        # if not user_ele:
-        #     # Fallback check for avatar
-        #     if "avatar" in self.page.html:
-        #         logger.info("登录验证成功 (通过 avatar)")
-        #         return True
-        #     logger.error("登录验证失败 (未找到 current-user)")
-        #     return False
-        # else:
-        #     logger.info("登录验证成功")
-        #     return True
+        try:
+            user_ele = self.page.ele("@id=current-user")
+        except Exception as e:
+            logger.warning(f"登录验证失败: {str(e)}")
+            return True
+        if not user_ele:
+            # Fallback check for avatar
+            if "avatar" in self.page.html:
+                logger.info("登录验证成功 (通过 avatar)")
+                return True
+            logger.error("登录验证失败 (未找到 current-user)")
+            return False
+        else:
+            logger.info("登录验证成功")
+            return True
 
     def click_topic(self):
         topic_list = self.page.ele("@id=list-area").eles(".:title")
