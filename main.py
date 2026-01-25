@@ -16,7 +16,7 @@ from curl_cffi import requests
 from bs4 import BeautifulSoup
 
 
-def retry_decorator(retries=3):
+def retry_decorator(retries=3, min_delay=5, max_delay=10):
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
@@ -29,7 +29,12 @@ def retry_decorator(retries=3):
                     logger.warning(
                         f"函数 {func.__name__} 第 {attempt + 1}/{retries} 次尝试失败: {str(e)}"
                     )
-                    time.sleep(1)
+                    if attempt < retries - 1:
+                        sleep_s = random.uniform(min_delay, max_delay)
+                        logger.info(
+                            f"将在 {sleep_s:.2f}s 后重试 ({min_delay}-{max_delay}s 随机延迟)"
+                        )
+                        time.sleep(sleep_s)
             return None
 
         return wrapper
@@ -71,6 +76,8 @@ class LinuxDoBrowser:
             platformIdentifier = "Macintosh; Intel Mac OS X 10_15_7"
         elif platform == "win32":
             platformIdentifier = "Windows NT 10.0; Win64; x64"
+        else:
+            platformIdentifier = "X11; Linux x86_64"
 
         co = (
             ChromiumOptions()
@@ -201,11 +208,16 @@ class LinuxDoBrowser:
     @retry_decorator()
     def click_one_topic(self, topic_url):
         new_page = self.browser.new_tab()
-        new_page.get(topic_url)
-        if random.random() < 0.3:  # 0.3 * 30 = 9
-            self.click_like(new_page)
-        self.browse_post(new_page)
-        new_page.close()
+        try:
+            new_page.get(topic_url)
+            if random.random() < 0.3:  # 0.3 * 30 = 9
+                self.click_like(new_page)
+            self.browse_post(new_page)
+        finally:
+            try:
+                new_page.close()
+            except Exception:
+                pass
 
     def browse_post(self, page):
         prev_url = None
@@ -238,20 +250,28 @@ class LinuxDoBrowser:
             time.sleep(wait_time)
 
     def run(self):
-        login_res = self.login()
-        if not login_res:  # 登录
-            logger.warning("登录验证失败")
+        try:
+            login_res = self.login()
+            if not login_res:  # 登录
+                logger.warning("登录验证失败")
 
-        if BROWSE_ENABLED:
-            click_topic_res = self.click_topic()  # 点击主题
-            if not click_topic_res:
-                logger.error("点击主题失败，程序终止")
-                return
-            logger.info("完成浏览任务")
+            if BROWSE_ENABLED:
+                click_topic_res = self.click_topic()  # 点击主题
+                if not click_topic_res:
+                    logger.error("点击主题失败，程序终止")
+                    return
+                logger.info("完成浏览任务")
 
-        self.send_notifications(BROWSE_ENABLED)  # 发送通知
-        self.page.close()
-        self.browser.quit()
+            self.send_notifications(BROWSE_ENABLED)  # 发送通知
+        finally:
+            try:
+                self.page.close()
+            except Exception:
+                pass
+            try:
+                self.browser.quit()
+            except Exception:
+                pass
 
     def click_like(self, page):
         try:
