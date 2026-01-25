@@ -54,6 +54,8 @@ if not PASSWORD:
 GOTIFY_URL = os.environ.get("GOTIFY_URL")  # Gotify 服务器地址
 GOTIFY_TOKEN = os.environ.get("GOTIFY_TOKEN")  # Gotify 应用的 API Token
 SC3_PUSH_KEY = os.environ.get("SC3_PUSH_KEY")  # Server酱³ SendKey
+WXPUSH_URL = os.environ.get("WXPUSH_URL")  # wxpush 服务器地址
+WXPUSH_TOKEN = os.environ.get("WXPUSH_TOKEN")  # wxpush 的 token
 
 HOME_URL = "https://linux.do/"
 LOGIN_URL = "https://linux.do/login"
@@ -295,7 +297,7 @@ class LinuxDoBrowser:
         print(tabulate(info, headers=["项目", "当前", "要求"], tablefmt="pretty"))
 
     def send_notifications(self, browse_enabled):
-        status_msg = "✅每日登录成功: {USERNAME}"
+        status_msg = f"✅每日登录成功: {USERNAME}"
         if browse_enabled:
             status_msg += " + 浏览任务完成"
 
@@ -339,6 +341,24 @@ class LinuxDoBrowser:
                         sleep_time = random.randint(180, 360)
                         logger.info(f"将在 {sleep_time} 秒后重试...")
                         time.sleep(sleep_time)
+
+        if WXPUSH_URL and WXPUSH_TOKEN:
+            try:
+                response = requests.post(
+                    f"{WXPUSH_URL}/wxsend",
+                    headers={
+                        "Authorization": WXPUSH_TOKEN,
+                        "Content-Type": "application/json",
+                    },
+                    json={"title": "LINUX DO", "content": status_msg},
+                    timeout=10,
+                )
+                response.raise_for_status()
+                logger.success(f"wxpush 推送成功: {response.text}")
+            except Exception as e:
+                logger.error(f"wxpush 推送失败: {str(e)}")
+        else:
+            logger.info("未配置 WXPUSH_URL 或 WXPUSH_TOKEN，跳过通知发送")
 
 
 if __name__ == "__main__":
