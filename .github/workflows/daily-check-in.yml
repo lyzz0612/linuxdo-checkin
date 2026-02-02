@@ -9,12 +9,9 @@ on:
 
 jobs:
   run_script:
-    runs-on: ubuntu-22.04
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: browser-actions/setup-chrome@v1
-      - name: Check Chrome version
-        run: chrome --version
         
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -47,10 +44,10 @@ jobs:
           TELEGRAM_USERID: ${{ secrets.TELEGRAM_USERID }}
         if: ${{ success() && env.TELEGRAM_TOKEN != '' && env.TELEGRAM_USERID != '' }}
         run: |
-          curl -s -X POST "https://api.telegram.org/bot${{ env.TELEGRAM_TOKEN }}/sendMessage" \
-          -d chat_id=${{ env.TELEGRAM_USERID }} \
-          -d parse_mode=HTML \
-          -d text="✅ <b>LINUX DO</b> 每日签到成功完成"
+          curl -s -X POST "https://api.telegram.org/bot${{ env.TELEGRAM_TOKEN }}/sendMessage" ^
+          -d chat_id=${{ env.TELEGRAM_USERID }} ^
+          -d parse_mode=HTML ^
+          -d text="❌ <b>LINUX DO</b> 每日签到失败"
 
       - name: Send Failure Notification
         env:
