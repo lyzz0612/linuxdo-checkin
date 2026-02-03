@@ -8,12 +8,25 @@ import random
 import time
 import functools
 import sys
+import io
 import requests
 import re
 from loguru import logger
 from DrissionPage import ChromiumOptions, Chromium
 from tabulate import tabulate
 
+# Ensure stdout uses UTF-8 encoding to avoid UnicodeEncodeError on Windows/CI
+# This should run early (after imports) so all prints use UTF-8.
+try:
+    # Python 3.7+ supports reconfigure
+    sys.stdout.reconfigure(encoding="utf-8")
+except Exception:
+    # Fallback: wrap the buffer with a TextIOWrapper
+    try:
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
+    except Exception:
+        # If we still can't, continue; prints may still fail in rare environments
+        pass
 
 def retry_decorator(retries=3):
     def decorator(func):
@@ -34,7 +47,6 @@ def retry_decorator(retries=3):
         return wrapper
 
     return decorator
-
 
 os.environ.pop("DISPLAY", None)
 os.environ.pop("DYLD_LIBRARY_PATH", None)
@@ -141,7 +153,7 @@ class LinuxDoBrowser:
     def click_topic(self):
         self.page.get("https://linux.do/top?period=daily")
         time.sleep(2)
-        topic_list = self.page.ele("@id=list-area").eles(".:title")
+        topic_list = self.page.ele("@id=list-area").eles(":title")
         logger.info(f"发现 {len(topic_list)} 个主题帖，随机选择10个")
         for topic in random.sample(topic_list, 10):
             self.click_one_topic(topic.attr("href"))
